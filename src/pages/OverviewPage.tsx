@@ -59,17 +59,24 @@ export function OverviewPage() {
       ) : (
         <>
           {/* Summary Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
             <SummaryCard icon="🚶" label="Steps" value={latest?.steps?.toLocaleString() ?? "--"} />
             <SummaryCard icon="🔥" label="Calories" value={latest?.calories?.toLocaleString() ?? "--"} />
             <SummaryCard icon="📏" label="Distance" value={latest?.distance_meters ? `${(latest.distance_meters / 1000).toFixed(1)} km` : "--"} />
             <SummaryCard icon="😴" label="Giấc ngủ" value={formatMinutes(latest?.sleep_minutes)} />
+            <SummaryCard icon="💤" label="Sleep Score" value={latest?.sleep_score != null ? `${latest.sleep_score}` : "--"} />
             <SummaryCard
               icon="❤️"
               label="Nhịp tim"
               value={latest?.resting_heart_rate ? `${latest.resting_heart_rate}/${latest.max_heart_rate ?? "--"}` : "--"}
             />
-            <SummaryCard icon="🌙" label="Deep Sleep" value={formatMinutes(latest?.deep_sleep_minutes)} />
+            <SummaryCard icon="😰" label="Stress" value={latest?.avg_stress != null ? `${latest.avg_stress}` : "--"} />
+            <SummaryCard icon="🫁" label="SpO2" value={latest?.avg_spo2 != null ? `${latest.avg_spo2}%` : "--"} />
+            <SummaryCard icon="💓" label="HRV" value={latest?.hrv != null ? `${Math.round(latest.hrv)}ms` : "--"} />
+            <SummaryCard icon="⚡" label="PAI" value={latest?.daily_pai != null ? `${Math.round(latest.daily_pai)}` : "--"} />
+            <SummaryCard icon="💪" label="Readiness" value={latest?.readiness_score != null ? `${latest.readiness_score}` : "--"} />
+            <SummaryCard icon="🧠" label="Mental" value={latest?.mental_score != null ? `${latest.mental_score}` : "--"} />
+            <SummaryCard icon="🏋️" label="Physical" value={latest?.physical_score != null ? `${latest.physical_score}` : "--"} />
           </div>
 
           {/* Charts */}
@@ -129,6 +136,64 @@ export function OverviewPage() {
                   <Tooltip contentStyle={{ background: "#1a2733", border: "1px solid #2a3f52", borderRadius: 8 }} />
                   <Bar dataKey="calories" fill="#ffa726" radius={[4, 4, 0, 0]} />
                 </BarChart>
+              </ResponsiveContainer>
+            </ChartCard>
+
+            {/* SpO2 */}
+            <ChartCard title="🫁 SpO2">
+              <ResponsiveContainer width="100%" height={250}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e2d3d" />
+                  <XAxis dataKey="label" tick={{ fill: "#78909c", fontSize: 11 }} />
+                  <YAxis domain={[85, 100]} tick={{ fill: "#78909c", fontSize: 11 }} />
+                  <Tooltip contentStyle={{ background: "#1a2733", border: "1px solid #2a3f52", borderRadius: 8 }} />
+                  <Line type="monotone" dataKey="avg_spo2" stroke="#26c6da" name="SpO2 %" dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartCard>
+
+            {/* Stress */}
+            <ChartCard title="😰 Stress">
+              <ResponsiveContainer width="100%" height={250}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e2d3d" />
+                  <XAxis dataKey="label" tick={{ fill: "#78909c", fontSize: 11 }} />
+                  <YAxis domain={[0, 100]} tick={{ fill: "#78909c", fontSize: 11 }} />
+                  <Tooltip contentStyle={{ background: "#1a2733", border: "1px solid #2a3f52", borderRadius: 8 }} />
+                  <Line type="monotone" dataKey="avg_stress" stroke="#ffa726" name="Avg Stress" dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartCard>
+
+            {/* HRV & PAI */}
+            <ChartCard title="💓 HRV & ⚡ PAI">
+              <ResponsiveContainer width="100%" height={250}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e2d3d" />
+                  <XAxis dataKey="label" tick={{ fill: "#78909c", fontSize: 11 }} />
+                  <YAxis yAxisId="hrv" tick={{ fill: "#78909c", fontSize: 11 }} />
+                  <YAxis yAxisId="pai" orientation="right" tick={{ fill: "#78909c", fontSize: 11 }} />
+                  <Tooltip contentStyle={{ background: "#1a2733", border: "1px solid #2a3f52", borderRadius: 8 }} />
+                  <Legend />
+                  <Line yAxisId="hrv" type="monotone" dataKey="hrv" stroke="#7c4dff" name="HRV (ms)" dot={false} />
+                  <Line yAxisId="pai" type="monotone" dataKey="total_pai" stroke="#ab47bc" name="PAI" dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartCard>
+
+            {/* Readiness & Body Scores */}
+            <ChartCard title="💪 Readiness & Body Scores">
+              <ResponsiveContainer width="100%" height={250}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e2d3d" />
+                  <XAxis dataKey="label" tick={{ fill: "#78909c", fontSize: 11 }} />
+                  <YAxis domain={[0, 100]} tick={{ fill: "#78909c", fontSize: 11 }} />
+                  <Tooltip contentStyle={{ background: "#1a2733", border: "1px solid #2a3f52", borderRadius: 8 }} />
+                  <Legend />
+                  <Line type="monotone" dataKey="readiness_score" stroke="#66bb6a" name="Readiness" dot={false} />
+                  <Line type="monotone" dataKey="mental_score" stroke="#29b6f6" name="Mental" dot={false} />
+                  <Line type="monotone" dataKey="physical_score" stroke="#ffa726" name="Physical" dot={false} />
+                </LineChart>
               </ResponsiveContainer>
             </ChartCard>
           </div>

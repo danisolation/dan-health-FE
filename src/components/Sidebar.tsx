@@ -6,6 +6,9 @@ const navItems: NavItem[] = [
   { label: "Nhịp tim", icon: "❤️", path: "/heart-rate" },
   { label: "Giấc ngủ", icon: "😴", path: "/sleep" },
   { label: "Vận động", icon: "🚶", path: "/activity" },
+  { label: "Stress", icon: "😰", path: "/stress" },
+  { label: "SpO2", icon: "🫁", path: "/spo2" },
+  { label: "Readiness", icon: "💪", path: "/readiness" },
   { label: "Workouts", icon: "🏃", path: "/workouts" },
 ];
 

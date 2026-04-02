@@ -1,22 +1,73 @@
 /**
  * TypeScript interfaces cho dữ liệu health từ Amazfit.
- * Mapping 1:1 với backend API response và dashboard.html data.
+ * Mapping 1:1 với backend API response.
  */
 
 /** Summary card data cho ngày hiện tại / mới nhất */
 export interface DailySummary {
   date: string;
+  // Activity
   steps: number;
   distance_meters: number;
   calories: number;
+  // Sleep
   sleep_minutes: number;
   deep_sleep_minutes: number;
   light_sleep_minutes: number;
   rem_sleep_minutes: number;
   awake_minutes: number;
   sleep_score: number | null;
+  sleep_start: string | null;
+  sleep_end: string | null;
+  sleep_onset_latency: number | null;
+  wake_count: number | null;
+  interruption_score: number | null;
+  sleep_resting_hr: number | null;
+  // Heart rate
   resting_heart_rate: number | null;
   max_heart_rate: number | null;
+  // Stress
+  avg_stress: number | null;
+  min_stress: number | null;
+  max_stress: number | null;
+  stress_relax_pct: number | null;
+  stress_normal_pct: number | null;
+  stress_medium_pct: number | null;
+  stress_high_pct: number | null;
+  // SpO2
+  avg_spo2: number | null;
+  spo2_odi: number | null;
+  // PAI
+  total_pai: number | null;
+  daily_pai: number | null;
+  pai_low_zone_min: number | null;
+  pai_medium_zone_min: number | null;
+  pai_high_zone_min: number | null;
+  // Readiness / HRV
+  readiness_score: number | null;
+  readiness_insight: number | null;
+  hrv: number | null;
+  sleep_hrv: number | null;
+  hrv_score: number | null;
+  vo2_max: number | null;
+  // Body scores
+  rhr_score: number | null;
+  rhr_baseline: number | null;
+  sleep_rhr: number | null;
+  mental_score: number | null;
+  mental_baseline: number | null;
+  physical_score: number | null;
+  physical_baseline: number | null;
+  // Medical
+  afib_score: number | null;
+  afib_baseline: number | null;
+  ahi_score: number | null;
+  ahi_baseline: number | null;
+  // Workout HR
+  workout_avg_hr: number | null;
+  workout_max_hr: number | null;
+  workout_min_hr: number | null;
+  workout_count: number;
 }
 
 /** Heart rate record từ backend */
@@ -38,6 +89,12 @@ export interface SleepRecord {
   rem_sleep_minutes: number;
   awake_minutes: number;
   sleep_score: number | null;
+  sleep_start: string | null;
+  sleep_end: string | null;
+  sleep_onset_latency: number | null;
+  wake_count: number | null;
+  interruption_score: number | null;
+  resting_heart_rate: number | null;
   created_at: string;
 }
 
@@ -49,14 +106,66 @@ export interface ActivityRecord {
   calories: number;
   distance_meters: number;
   active_minutes: number;
+  // Stress
+  min_stress: number | null;
+  max_stress: number | null;
+  stress_relax_pct: number | null;
+  stress_normal_pct: number | null;
+  stress_medium_pct: number | null;
+  stress_high_pct: number | null;
+  // SpO2
+  spo2_odi: number | null;
+  // PAI
+  daily_pai: number | null;
+  pai_low_zone_min: number | null;
+  pai_medium_zone_min: number | null;
+  pai_high_zone_min: number | null;
+  // Readiness
+  readiness_score: number | null;
+  readiness_insight: number | null;
+  hrv: number | null;
+  sleep_hrv: number | null;
+  hrv_score: number | null;
+  // Body
+  rhr_score: number | null;
+  rhr_baseline: number | null;
+  sleep_rhr: number | null;
+  mental_score: number | null;
+  mental_baseline: number | null;
+  physical_score: number | null;
+  physical_baseline: number | null;
+  // Medical
+  afib_baseline: number | null;
+  ahi_score: number | null;
+  ahi_baseline: number | null;
+  created_at: string;
+}
+
+/** Stress reading detail */
+export interface StressReading {
+  id: number;
+  reading_date: string;
+  recorded_at: string;
+  stress_value: number;
+  created_at: string;
+}
+
+/** SpO2 reading detail */
+export interface SpO2Reading {
+  id: number;
+  reading_date: string;
+  recorded_at: string;
+  spo2_value: number;
+  reading_type: string | null;
   created_at: string;
 }
 
 /** Workout record */
 export interface WorkoutRecord {
+  id: number;
   track_id: string;
-  workout_type: number;
-  workout_name: string;
+  workout_type: number | null;
+  workout_name: string | null;
   start_time: string;
   end_time: string;
   duration_seconds: number;
@@ -68,17 +177,18 @@ export interface WorkoutRecord {
   avg_pace: number | null;
   total_steps: number | null;
   training_effect: number | null;
-  vo2_max: number | null;
-  synced_at: string;
+  // Extended
+  anaerobic_te: number | null;
+  exercise_load: number | null;
+  avg_stride_length: number | null;
+  pause_time: number | null;
+  synced_at: string | null;
+  created_at: string;
 }
 
 /** API response wrappers */
 export interface DailyResponse {
   data: DailySummary[];
-}
-
-export interface WorkoutsResponse {
-  data: WorkoutRecord[];
 }
 
 export interface SyncResult {

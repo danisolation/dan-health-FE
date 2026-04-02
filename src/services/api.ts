@@ -8,6 +8,9 @@ import type {
   HeartRateRecord,
   SleepRecord,
   ActivityRecord,
+  StressReading,
+  SpO2Reading,
+  WorkoutRecord,
 } from "@/types/health";
 
 const API_BASE = "http://localhost:8000/api/v1";
@@ -21,7 +24,7 @@ async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-/** Lấy overview data (activity + sleep + HR gộp theo ngày) */
+/** Lấy overview data (activity + sleep + HR + stress + SpO2 + HRV gộp theo ngày) */
 export function getOverview(start: string, end: string): Promise<DailyResponse> {
   return fetchJSON(`${API_BASE}/overview?start=${start}&end=${end}`);
 }
@@ -45,6 +48,21 @@ export function getSleepRecords(start: string, end: string): Promise<SleepRecord
 /** Lấy activity records */
 export function getActivityRecords(start: string, end: string): Promise<ActivityRecord[]> {
   return fetchJSON(`${API_BASE}/activity?start=${start}&end=${end}`);
+}
+
+/** Lấy stress detail readings */
+export function getStressReadings(start: string, end: string): Promise<StressReading[]> {
+  return fetchJSON(`${API_BASE}/stress?start=${start}&end=${end}`);
+}
+
+/** Lấy SpO2 detail readings */
+export function getSpO2Readings(start: string, end: string): Promise<SpO2Reading[]> {
+  return fetchJSON(`${API_BASE}/spo2?start=${start}&end=${end}`);
+}
+
+/** Lấy workouts */
+export function getWorkouts(start: string, end: string): Promise<WorkoutRecord[]> {
+  return fetchJSON(`${API_BASE}/workouts?start=${start}&end=${end}`);
 }
 
 /** Trigger sync thủ công */

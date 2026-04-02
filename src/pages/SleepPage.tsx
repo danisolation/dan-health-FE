@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  BarChart, Bar, LineChart, Line,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
 import { getSleepRecords } from "@/services/api";
 import { useDateRange } from "@/hooks/useDateRange";
@@ -32,6 +33,7 @@ export function SleepPage() {
     rem: d.rem_sleep_minutes,
     awake: d.awake_minutes,
     total: d.total_minutes,
+    sleep_score: d.sleep_score,
   }));
 
   return (
@@ -58,32 +60,52 @@ export function SleepPage() {
       ) : (
         <>
           {/* Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
             <StatCard label="Tổng ngủ" value={formatMinutes(latest?.total_minutes)} />
+            <StatCard label="Sleep Score" value={latest?.sleep_score != null ? `${latest.sleep_score}` : "--"} />
             <StatCard label="Deep" value={formatMinutes(latest?.deep_sleep_minutes)} />
             <StatCard label="Light" value={formatMinutes(latest?.light_sleep_minutes)} />
             <StatCard label="REM" value={formatMinutes(latest?.rem_sleep_minutes)} />
+            <StatCard label="Onset Latency" value={latest?.sleep_onset_latency != null ? `${latest.sleep_onset_latency}m` : "--"} />
+            <StatCard label="Wake Count" value={latest?.wake_count != null ? `${latest.wake_count}` : "--"} />
             <StatCard label="Avg / đêm" value={formatMinutes(avgTotal)} />
           </div>
 
-          {/* Stacked bar chart */}
-          <div className="bg-dark-card border border-dark-border rounded-xl p-4">
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e2d3d" />
-                <XAxis dataKey="label" tick={{ fill: "#78909c", fontSize: 11 }} />
-                <YAxis tick={{ fill: "#78909c", fontSize: 11 }} label={{ value: "phút", angle: -90, position: "insideLeft", fill: "#78909c" }} />
-                <Tooltip
-                  contentStyle={{ background: "#1a2733", border: "1px solid #2a3f52", borderRadius: 8 }}
-                  formatter={(value: number, name: string) => [`${value} phút`, name]}
-                />
-                <Legend />
-                <Bar dataKey="deep" stackId="sleep" fill="#3949ab" name="Deep" />
-                <Bar dataKey="light" stackId="sleep" fill="#7986cb" name="Light" />
-                <Bar dataKey="rem" stackId="sleep" fill="#9fa8da" name="REM" />
-                <Bar dataKey="awake" stackId="sleep" fill="#546e7a" name="Awake" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Stacked bar chart */}
+            <div className="bg-dark-card border border-dark-border rounded-xl p-4">
+              <h3 className="text-sm text-gray-400 mb-4">Sleep Stages</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e2d3d" />
+                  <XAxis dataKey="label" tick={{ fill: "#78909c", fontSize: 11 }} />
+                  <YAxis tick={{ fill: "#78909c", fontSize: 11 }} label={{ value: "phút", angle: -90, position: "insideLeft", fill: "#78909c" }} />
+                  <Tooltip
+                    contentStyle={{ background: "#1a2733", border: "1px solid #2a3f52", borderRadius: 8 }}
+                    formatter={(value, name) => [`${value} phút`, name]}
+                  />
+                  <Legend />
+                  <Bar dataKey="deep" stackId="sleep" fill="#3949ab" name="Deep" />
+                  <Bar dataKey="light" stackId="sleep" fill="#7986cb" name="Light" />
+                  <Bar dataKey="rem" stackId="sleep" fill="#9fa8da" name="REM" />
+                  <Bar dataKey="awake" stackId="sleep" fill="#546e7a" name="Awake" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Sleep Score trend */}
+            <div className="bg-dark-card border border-dark-border rounded-xl p-4">
+              <h3 className="text-sm text-gray-400 mb-4">💤 Sleep Score Trend</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e2d3d" />
+                  <XAxis dataKey="label" tick={{ fill: "#78909c", fontSize: 11 }} />
+                  <YAxis domain={[0, 100]} tick={{ fill: "#78909c", fontSize: 11 }} />
+                  <Tooltip contentStyle={{ background: "#1a2733", border: "1px solid #2a3f52", borderRadius: 8 }} />
+                  <Line type="monotone" dataKey="sleep_score" stroke="#7c4dff" name="Sleep Score" dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </>
       )}
