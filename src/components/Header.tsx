@@ -1,14 +1,22 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { triggerSync } from "@/services/api";
 import type { SyncResult } from "@/types/health";
 
 interface HeaderProps {
   sidebarCollapsed: boolean;
+  onMobileMenuOpen: () => void;
 }
 
-export function Header({ sidebarCollapsed }: HeaderProps) {
+export function Header({ sidebarCollapsed, onMobileMenuOpen }: HeaderProps) {
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<SyncResult | null>(null);
+
+  // Auto-dismiss sync toast after 6 seconds
+  useEffect(() => {
+    if (!syncResult) return;
+    const timer = setTimeout(() => setSyncResult(null), 6000);
+    return () => clearTimeout(timer);
+  }, [syncResult]);
 
   const handleSync = useCallback(async () => {
     setSyncing(true);
@@ -28,20 +36,35 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
       className={`
         fixed top-0 right-0 z-30 h-14
         bg-dark-card border-b border-dark-border
-        flex items-center justify-between px-6
+        flex items-center justify-between px-4 md:px-6
         transition-all duration-300
-        ${sidebarCollapsed ? "left-16" : "left-56"}
+        left-0 ${sidebarCollapsed ? "md:left-16" : "md:left-56"}
       `}
+      role="banner"
     >
-      <h2 className="text-sm font-medium text-gray-300">
-        Health Dashboard
-      </h2>
+      <div className="flex items-center gap-3">
+        {/* Mobile hamburger */}
+        <button
+          onClick={onMobileMenuOpen}
+          className="md:hidden text-gray-400 hover:text-gray-200 p-1"
+          aria-label="Mở menu"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
 
-      <div className="flex items-center gap-4">
+        <h2 className="text-sm font-medium text-gray-300">
+          Health Dashboard
+        </h2>
+      </div>
+
+      <div className="flex items-center gap-3">
         {/* Sync status message */}
         {syncResult && (
           <span
-            className={`text-xs px-3 py-1 rounded-full ${
+            role="status"
+            className={`text-xs px-3 py-1 rounded-full motion-safe:animate-fade-in ${
               syncResult.error
                 ? "bg-red-900/50 text-red-300"
                 : "bg-green-900/50 text-green-300"
@@ -59,12 +82,12 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
         <button
           onClick={handleSync}
           disabled={syncing}
-          className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm
+          className="flex items-center gap-2 px-3 md:px-4 py-1.5 rounded-lg text-sm
                      bg-blue-700 hover:bg-blue-600 disabled:bg-gray-700
                      disabled:cursor-not-allowed transition-colors"
         >
-          <span className={syncing ? "animate-spin" : ""}>🔄</span>
-          {syncing ? "Đang sync..." : "Sync Now"}
+          <span className={syncing ? "motion-safe:animate-spin" : ""} role="img" aria-hidden="true">🔄</span>
+          <span className="hidden sm:inline">{syncing ? "Đang sync..." : "Sync Now"}</span>
         </button>
       </div>
     </header>

@@ -38,7 +38,6 @@ export interface DailySummary {
   avg_spo2: number | null;
   spo2_odi: number | null;
   // PAI
-  total_pai: number | null;
   daily_pai: number | null;
   pai_low_zone_min: number | null;
   pai_medium_zone_min: number | null;
@@ -49,7 +48,6 @@ export interface DailySummary {
   hrv: number | null;
   sleep_hrv: number | null;
   hrv_score: number | null;
-  vo2_max: number | null;
   // Body scores
   rhr_score: number | null;
   rhr_baseline: number | null;
@@ -59,7 +57,6 @@ export interface DailySummary {
   physical_score: number | null;
   physical_baseline: number | null;
   // Medical
-  afib_score: number | null;
   afib_baseline: number | null;
   ahi_score: number | null;
   ahi_baseline: number | null;
@@ -196,6 +193,50 @@ export interface SyncResult {
   counts?: Record<string, number>;
   synced_at?: string;
   error?: string;
+}
+
+// ===================== AI Insights =====================
+
+/** Trend analysis cho 1 metric */
+export interface TrendData {
+  metric: string;
+  direction: "improving" | "declining" | "stable";
+  change_pct: number;
+  current_avg: number;
+  previous_avg: number;
+  latest_value: number | null;
+}
+
+/** Anomaly detected */
+export interface AnomalyData {
+  metric: string;
+  date: string;
+  value: number;
+  baseline: number;
+  z_score: number;
+  severity: "info" | "warning" | "critical";
+  message: string;
+}
+
+/** AI daily insight response */
+export interface InsightResponse {
+  summary: string;
+  trends: TrendData[];
+  anomalies: AnomalyData[];
+  generated_at: string;
+  cached: boolean;
+}
+
+/** Trends-only response */
+export interface TrendsResponse {
+  trends: TrendData[];
+  days: number;
+}
+
+/** Anomalies-only response */
+export interface AnomaliesResponse {
+  anomalies: AnomalyData[];
+  days: number;
 }
 
 /** Sidebar navigation item */

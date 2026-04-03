@@ -1,3 +1,37 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Accessibility ── */
+
+/* Focus-visible ring cho tất cả interactive elements */
+@layer base {
+  button:focus-visible,
+  a:focus-visible,
+  [role="button"]:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    @apply outline-none ring-2 ring-accent-blue ring-offset-1 ring-offset-dark-bg;
+  }
+}
+
+/* Tôn trọng prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Skip to content link (hidden until focused) */
+.skip-link {
+  @apply sr-only;
+}
+.skip-link:focus {
+  @apply not-sr-only fixed top-2 left-2 z-[100] px-4 py-2 rounded-lg
+         bg-accent-blue text-dark-bg text-sm font-medium;
+}

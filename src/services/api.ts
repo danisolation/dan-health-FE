@@ -11,9 +11,12 @@ import type {
   StressReading,
   SpO2Reading,
   WorkoutRecord,
+  InsightResponse,
+  TrendsResponse,
+  AnomaliesResponse,
 } from "@/types/health";
 
-const API_BASE = "http://localhost:8000/api/v1";
+const API_BASE = "/api/v1";
 
 async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, init);
@@ -68,4 +71,21 @@ export function getWorkouts(start: string, end: string): Promise<WorkoutRecord[]
 /** Trigger sync thủ công */
 export function triggerSync(days: number): Promise<SyncResult> {
   return fetchJSON(`${API_BASE}/sync?days=${days}`, { method: "POST" });
+}
+
+// ===================== AI Insights =====================
+
+/** Lấy AI daily insight (summary + trends + anomalies) */
+export function getDailyInsight(days: number = 30): Promise<InsightResponse> {
+  return fetchJSON(`${API_BASE}/insights/daily?days=${days}`);
+}
+
+/** Lấy trend analysis (không gọi LLM) */
+export function getTrends(days: number = 30): Promise<TrendsResponse> {
+  return fetchJSON(`${API_BASE}/insights/trends?days=${days}`);
+}
+
+/** Lấy anomaly detection (không gọi LLM) */
+export function getAnomalies(days: number = 30): Promise<AnomaliesResponse> {
+  return fetchJSON(`${API_BASE}/insights/anomalies?days=${days}`);
 }
