@@ -1,10 +1,10 @@
 /**
  * AI Insight Card — Hiển thị AI-generated health summary.
- * Bao gồm: summary text, anomaly badges, loading state.
+ * Bao gồm: summary text, anomaly badges, detailed analysis toggle.
  */
-import { useEffect, useState } from "react";
-import { getDailyInsight } from "@/services/api";
-import type { InsightResponse, AnomalyData } from "@/types/health";
+import { useEffect, useState, useCallback } from "react";
+import { getDailyInsight, getDetailedAnalysis } from "@/services/api";
+import type { InsightResponse, DetailedAnalysisResponse, AnomalyData } from "@/types/health";
 
 interface AiInsightCardProps {
   days: number;
@@ -12,7 +12,10 @@ interface AiInsightCardProps {
 
 export function AiInsightCard({ days }: AiInsightCardProps) {
   const [insight, setInsight] = useState<InsightResponse | null>(null);
+  const [detailed, setDetailed] = useState<DetailedAnalysisResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [detailedLoading, setDetailedLoading] = useState(false);
+  const [showDetailed, setShowDetailed] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -23,6 +26,23 @@ export function AiInsightCard({ days }: AiInsightCardProps) {
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, [days]);
+
+  const handleDetailedAnalysis = useCallback(async () => {
+    if (detailed) {
+      setShowDetailed((prev) => !prev);
+      return;
+    }
+    setDetailedLoading(true);
+    setShowDetailed(true);
+    try {
+      const result = await getDetailedAnalysis(days);
+      setDetailed(result);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Lỗi phân tích chi tiết");
+    } finally {
+      setDetailedLoading(false);
+    }
+  }, [detailed, days]);
 
   if (loading) {
     return (
@@ -69,15 +89,106 @@ export function AiInsightCard({ days }: AiInsightCardProps) {
 
       {/* Anomaly badges */}
       {insight.anomalies.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 mb-4">
           {insight.anomalies.map((a) => (
             <AnomalyBadge key={`${a.metric}-${a.date}`} anomaly={a} />
           ))}
         </div>
       )}
+
+      {/* Detailed analysis toggle */}
+      <div className="border-t border-dark-border pt-3">
+        <button
+          onClick={handleDetailedAnalysis}
+          disabled={detailedLoading}
+          className="flex items-center gap-2 text-sm text-accent-purple hover:text-purple-300
+                     disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
+        >
+          <span>{showDetailed ? "▼" : "▶"}</span>
+          <span>{detailedLoading ? "Đang phân tích chi tiết..." : showDetailed ? "Ẩn phân tích chi tiết" : "🔬 Phân tích chi tiết các chỉ số"}</span>
+          {detailedLoading && (
+            <span className="motion-safe:animate-spin">⏳</span>
+          )}
+        </button>
+
+        {/* Detailed content */}
+        {showDetailed && detailed && (
+          <div className="mt-4 space-y-4">
+            {/* Detailed analysis text */}
+            <div className="bg-dark-bg rounded-lg p-4 border border-dark-border">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-medium text-gray-200 flex items-center gap-2">
+                  <span>📊</span> Phân tích chi tiết {days} ngày
+                </h4>
+                {detailed.cached && (
+                  <span className="text-xs text-gray-500 bg-dark-card px-2 py-0.5 rounded">cached</span>
+                )}
+              </div>
+              <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-line prose-sm">
+                {detailed.analysis}
+              </div>
+            </div>
+
+            {/* Stats summary table */}
+            {Object.keys(detailed.stats).length > 0 && (
+              <div className="bg-dark-bg rounded-lg p-4 border border-dark-border overflow-x-auto">
+                <h4 className="text-sm font-medium text-gray-200 mb-3 flex items-center gap-2">
+                  <span>📈</span> Thống kê tổng hợp
+                </h4>
+                <table className="w-full text-xs text-gray-300">
+                  <thead>
+                    <tr className="border-b border-dark-border text-gray-400">
+                      <th scope="col" className="text-left py-1.5 pr-3">Chỉ số</th>
+                      <th scope="col" className="text-right py-1.5 px-2">TB</th>
+                      <th scope="col" className="text-right py-1.5 px-2">Min</th>
+                      <th scope="col" className="text-right py-1.5 px-2">Max</th>
+                      <th scope="col" className="text-right py-1.5 px-2">SD</th>
+                      <th scope="col" className="text-right py-1.5 pl-2">Ngày</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(detailed.stats).map(([metric, s]) => (
+                      <tr key={metric} className="border-b border-dark-border/50">
+                        <td className="py-1.5 pr-3 text-gray-200">{METRIC_LABELS[metric] ?? metric}</td>
+                        <td className="text-right py-1.5 px-2">{s.avg}</td>
+                        <td className="text-right py-1.5 px-2 text-blue-400">{s.min}</td>
+                        <td className="text-right py-1.5 px-2 text-orange-400">{s.max}</td>
+                        <td className="text-right py-1.5 px-2 text-gray-400">{s.std}</td>
+                        <td className="text-right py-1.5 pl-2 text-gray-400">{s.count}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
+
+const METRIC_LABELS: Record<string, string> = {
+  steps: "Bước chân",
+  calories: "Calories (kcal)",
+  sleep_minutes: "Giấc ngủ (phút)",
+  sleep_score: "Điểm ngủ",
+  deep_sleep_minutes: "Deep sleep (phút)",
+  rem_sleep_minutes: "REM (phút)",
+  light_sleep_minutes: "Light sleep (phút)",
+  wake_count: "Số lần thức giấc",
+  resting_heart_rate: "Nhịp tim nghỉ (bpm)",
+  max_heart_rate: "Nhịp tim max (bpm)",
+  avg_stress: "Stress TB",
+  stress_relax_pct: "Relax %",
+  stress_high_pct: "High stress %",
+  avg_spo2: "SpO2 (%)",
+  hrv: "HRV (ms)",
+  readiness_score: "Readiness",
+  daily_pai: "PAI",
+  mental_score: "Mental",
+  physical_score: "Physical",
+};
 
 function AnomalyBadge({ anomaly }: { anomaly: AnomalyData }) {
   const colors = {

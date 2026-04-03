@@ -244,6 +244,25 @@ export interface AnomaliesResponse {
   days: number;
 }
 
+/** Metric stats (min/max/avg/std) */
+export interface MetricStats {
+  avg: number;
+  min: number;
+  max: number;
+  std: number;
+  count: number;
+}
+
+/** Detailed analysis response */
+export interface DetailedAnalysisResponse {
+  analysis: string;
+  trends: TrendData[];
+  anomalies: AnomalyData[];
+  stats: Record<string, MetricStats>;
+  generated_at: string;
+  cached: boolean;
+}
+
 /** Sidebar navigation item */
 export interface NavItem {
   label: string;

@@ -13,6 +13,7 @@ import type {
   SpO2Reading,
   WorkoutRecord,
   InsightResponse,
+  DetailedAnalysisResponse,
   TrendsResponse,
   AnomaliesResponse,
 } from "@/types/health";
@@ -84,6 +85,11 @@ export function triggerCronSync(): Promise<CronSyncResult> {
 /** Lấy AI daily insight (summary + trends + anomalies) */
 export function getDailyInsight(days: number = 30): Promise<InsightResponse> {
   return fetchJSON(`${API_BASE}/insights/daily?days=${days}`);
+}
+
+/** Lấy AI detailed analysis (phân tích chi tiết từng chỉ số) */
+export function getDetailedAnalysis(days: number = 90): Promise<DetailedAnalysisResponse> {
+  return fetchJSON(`${API_BASE}/insights/detailed?days=${days}`);
 }
 
 /** Lấy trend analysis (không gọi LLM) */
