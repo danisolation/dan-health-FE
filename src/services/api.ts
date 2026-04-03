@@ -5,6 +5,7 @@
 import type {
   DailyResponse,
   SyncResult,
+  CronSyncResult,
   HeartRateRecord,
   SleepRecord,
   ActivityRecord,
@@ -71,6 +72,11 @@ export function getWorkouts(start: string, end: string): Promise<WorkoutRecord[]
 /** Trigger sync thủ công */
 export function triggerSync(days: number): Promise<SyncResult> {
   return fetchJSON(`${API_BASE}/sync?days=${days}`, { method: "POST" });
+}
+
+/** Trigger cron sync: sync 1 ngày + cleanup dữ liệu cũ */
+export function triggerCronSync(): Promise<CronSyncResult> {
+  return fetchJSON(`${API_BASE}/sync/cron`, { method: "POST" });
 }
 
 // ===================== AI Insights =====================

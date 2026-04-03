@@ -195,6 +195,11 @@ export interface SyncResult {
   error?: string;
 }
 
+export interface CronSyncResult {
+  sync: SyncResult;
+  cleanup: Record<string, number>;
+}
+
 // ===================== AI Insights =====================
 
 /** Trend analysis cho 1 metric */

@@ -15,7 +15,7 @@ import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
 
 export function HeartRatePage() {
-  const { start, end, days, setDays } = useDateRange(30);
+  const { start, end } = useDateRange();
 
   const { data, loading, error, retry } = useApiData(
     () => getOverview(start, end).then((res) => res.data),
@@ -53,7 +53,7 @@ export function HeartRatePage() {
 
   return (
     <div>
-      <PageHeader title="❤️ Nhịp tim" days={days} onDaysChange={setDays} accentColor="bg-accent-red text-white" />
+      <PageHeader title="❤️ Nhịp tim" />
 
       {loading ? (
         <LoadingState />

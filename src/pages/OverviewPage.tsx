@@ -17,17 +17,17 @@ import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
 
 export function OverviewPage() {
-  const { start, end, days, setDays } = useDateRange(30);
+  const { start, end } = useDateRange();
 
   const { data, loading, error, retry } = useApiData(
     async () => {
       const [overview, trendsRes] = await Promise.all([
         getOverview(start, end),
-        getTrends(days),
+        getTrends(90),
       ]);
       return { daily: overview.data, trends: trendsRes.trends };
     },
-    [start, end, days],
+    [start, end],
     { pageTitle: "Tổng quan" },
   );
 
@@ -43,7 +43,7 @@ export function OverviewPage() {
 
   return (
     <div>
-      <PageHeader title="Tổng quan" days={days} onDaysChange={setDays} />
+      <PageHeader title="Tổng quan" />
 
       {loading ? (
         <LoadingState />
@@ -53,7 +53,7 @@ export function OverviewPage() {
         <EmptyState />
       ) : (
         <>
-          <AiInsightCard days={days} />
+          <AiInsightCard days={90} />
 
           {/* Summary Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">

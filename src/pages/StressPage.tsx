@@ -15,7 +15,7 @@ import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
 
 export function StressPage() {
-  const { start, end, days, setDays } = useDateRange(30);
+  const { start, end } = useDateRange();
 
   const { data, loading, error, retry } = useApiData(
     async () => {
@@ -49,7 +49,7 @@ export function StressPage() {
 
   return (
     <div>
-      <PageHeader title="😰 Stress" days={days} onDaysChange={setDays} />
+      <PageHeader title="😰 Stress" />
 
       {loading ? (
         <LoadingState />

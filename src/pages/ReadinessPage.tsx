@@ -14,7 +14,7 @@ import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
 
 export function ReadinessPage() {
-  const { start, end, days, setDays } = useDateRange(30);
+  const { start, end } = useDateRange();
 
   const { data, loading, error, retry } = useApiData(
     () => getOverview(start, end).then((r) => r.data),
@@ -46,7 +46,7 @@ export function ReadinessPage() {
 
   return (
     <div>
-      <PageHeader title="💪 Readiness & HRV" days={days} onDaysChange={setDays} />
+      <PageHeader title="💪 Readiness & HRV" />
 
       {loading ? (
         <LoadingState />

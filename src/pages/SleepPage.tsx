@@ -15,7 +15,7 @@ import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
 
 export function SleepPage() {
-  const { start, end, days, setDays } = useDateRange(30);
+  const { start, end } = useDateRange();
 
   const { data, loading, error, retry } = useApiData(
     () => getSleepRecords(start, end),
@@ -41,7 +41,7 @@ export function SleepPage() {
 
   return (
     <div>
-      <PageHeader title="😴 Giấc ngủ" days={days} onDaysChange={setDays} accentColor="bg-indigo-600 text-white" />
+      <PageHeader title="😴 Giấc ngủ" />
 
       {loading ? (
         <LoadingState />

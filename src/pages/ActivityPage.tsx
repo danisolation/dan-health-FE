@@ -14,7 +14,7 @@ import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
 
 export function ActivityPage() {
-  const { start, end, days, setDays } = useDateRange(30);
+  const { start, end } = useDateRange();
 
   const { data, loading, error, retry } = useApiData(
     () => getActivityRecords(start, end),
@@ -38,7 +38,7 @@ export function ActivityPage() {
 
   return (
     <div>
-      <PageHeader title="🚶 Vận động" days={days} onDaysChange={setDays} />
+      <PageHeader title="🚶 Vận động" />
 
       {loading ? (
         <LoadingState />

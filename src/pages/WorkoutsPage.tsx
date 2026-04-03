@@ -8,7 +8,7 @@ import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
 
 export function WorkoutsPage() {
-  const { start, end, days, setDays } = useDateRange(90);
+  const { start, end } = useDateRange();
 
   const { data, loading, error, retry } = useApiData(
     () => getWorkouts(start, end),
@@ -23,7 +23,7 @@ export function WorkoutsPage() {
 
   return (
     <div>
-      <PageHeader title="🏃 Workouts" days={days} onDaysChange={setDays} />
+      <PageHeader title="🏃 Workouts" />
 
       {loading ? (
         <LoadingState />
