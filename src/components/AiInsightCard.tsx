@@ -3,6 +3,7 @@
  * Bao gồm: summary text, anomaly badges, detailed analysis toggle.
  */
 import { useEffect, useState, useCallback } from "react";
+import ReactMarkdown from "react-markdown";
 import { getDailyInsight, getDetailedAnalysis } from "@/services/api";
 import type { InsightResponse, DetailedAnalysisResponse, AnomalyData } from "@/types/health";
 
@@ -101,10 +102,13 @@ export function AiInsightCard({ days }: AiInsightCardProps) {
         <button
           onClick={handleDetailedAnalysis}
           disabled={detailedLoading}
+          aria-expanded={showDetailed}
+          aria-controls="detailed-analysis-panel"
           className="flex items-center gap-2 text-sm text-accent-purple hover:text-purple-300
-                     disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
+                     disabled:text-gray-500 disabled:cursor-not-allowed transition-colors
+                     focus:outline-none focus:ring-2 focus:ring-accent-purple/50 rounded px-1 -mx-1"
         >
-          <span>{showDetailed ? "▼" : "▶"}</span>
+          <span className={`transition-transform duration-200 ${showDetailed ? "rotate-90" : ""}`}>▶</span>
           <span>{detailedLoading ? "Đang phân tích chi tiết..." : showDetailed ? "Ẩn phân tích chi tiết" : "🔬 Phân tích chi tiết các chỉ số"}</span>
           {detailedLoading && (
             <span className="motion-safe:animate-spin">⏳</span>
@@ -112,57 +116,94 @@ export function AiInsightCard({ days }: AiInsightCardProps) {
         </button>
 
         {/* Detailed content */}
-        {showDetailed && detailed && (
-          <div className="mt-4 space-y-4">
-            {/* Detailed analysis text */}
-            <div className="bg-dark-bg rounded-lg p-4 border border-dark-border">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="text-sm font-medium text-gray-200 flex items-center gap-2">
-                  <span>📊</span> Phân tích chi tiết {days} ngày
-                </h4>
-                {detailed.cached && (
-                  <span className="text-xs text-gray-500 bg-dark-card px-2 py-0.5 rounded">cached</span>
-                )}
+        <div
+          id="detailed-analysis-panel"
+          role="region"
+          className={`grid transition-all duration-300 ease-in-out ${
+            showDetailed && (detailed || detailedLoading) ? "grid-rows-[1fr] opacity-100 mt-4" : "grid-rows-[0fr] opacity-0"
+          }`}
+        >
+          <div className="overflow-hidden">
+            {/* Skeleton loading */}
+            {detailedLoading && (
+              <div className="space-y-4 animate-pulse">
+                <div className="bg-dark-bg rounded-lg p-5 border border-dark-border space-y-3">
+                  <div className="h-4 bg-dark-hover rounded w-48" />
+                  <div className="h-3 bg-dark-hover/70 rounded w-full" />
+                  <div className="h-3 bg-dark-hover/70 rounded w-5/6" />
+                  <div className="h-3 bg-dark-hover/70 rounded w-4/6" />
+                  <div className="h-3 bg-dark-hover/70 rounded w-full" />
+                  <div className="h-3 bg-dark-hover/70 rounded w-3/4" />
+                </div>
+                <div className="bg-dark-bg rounded-lg p-5 border border-dark-border space-y-3">
+                  <div className="h-4 bg-dark-hover rounded w-40" />
+                  <div className="h-3 bg-dark-hover/70 rounded w-full" />
+                  <div className="h-3 bg-dark-hover/70 rounded w-full" />
+                  <div className="h-3 bg-dark-hover/70 rounded w-full" />
+                </div>
               </div>
-              <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-line prose-sm">
-                {detailed.analysis}
-              </div>
-            </div>
+            )}
 
-            {/* Stats summary table */}
-            {Object.keys(detailed.stats).length > 0 && (
-              <div className="bg-dark-bg rounded-lg p-4 border border-dark-border overflow-x-auto">
-                <h4 className="text-sm font-medium text-gray-200 mb-3 flex items-center gap-2">
-                  <span>📈</span> Thống kê tổng hợp
-                </h4>
-                <table className="w-full text-xs text-gray-300">
-                  <thead>
-                    <tr className="border-b border-dark-border text-gray-400">
-                      <th scope="col" className="text-left py-1.5 pr-3">Chỉ số</th>
-                      <th scope="col" className="text-right py-1.5 px-2">TB</th>
-                      <th scope="col" className="text-right py-1.5 px-2">Min</th>
-                      <th scope="col" className="text-right py-1.5 px-2">Max</th>
-                      <th scope="col" className="text-right py-1.5 px-2">SD</th>
-                      <th scope="col" className="text-right py-1.5 pl-2">Ngày</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(detailed.stats).map(([metric, s]) => (
-                      <tr key={metric} className="border-b border-dark-border/50">
-                        <td className="py-1.5 pr-3 text-gray-200">{METRIC_LABELS[metric] ?? metric}</td>
-                        <td className="text-right py-1.5 px-2">{s.avg}</td>
-                        <td className="text-right py-1.5 px-2 text-blue-400">{s.min}</td>
-                        <td className="text-right py-1.5 px-2 text-orange-400">{s.max}</td>
-                        <td className="text-right py-1.5 px-2 text-gray-400">{s.std}</td>
-                        <td className="text-right py-1.5 pl-2 text-gray-400">{s.count}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            {detailed && (
+              <div className="space-y-4">
+                {/* Detailed analysis text — rendered as Markdown */}
+                <div className="bg-dark-bg rounded-lg p-5 border border-dark-border">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-sm font-semibold text-gray-200 flex items-center gap-2">
+                      <span>📊</span> Phân tích chi tiết {days} ngày
+                    </h4>
+                    {detailed.cached && (
+                      <span className="text-xs text-gray-500 bg-dark-card px-2 py-0.5 rounded">cached</span>
+                    )}
+                  </div>
+                  <div className="prose prose-sm prose-invert max-w-none
+                    prose-headings:text-gray-200 prose-headings:font-semibold prose-headings:mt-4 prose-headings:mb-2
+                    prose-p:text-gray-300 prose-p:leading-relaxed
+                    prose-strong:text-gray-200
+                    prose-li:text-gray-300 prose-li:marker:text-accent-purple
+                    prose-ul:my-2 prose-ol:my-2
+                    prose-hr:border-dark-border">
+                    <ReactMarkdown>{detailed.analysis}</ReactMarkdown>
+                  </div>
+                </div>
+
+                {/* Stats summary table */}
+                {Object.keys(detailed.stats).length > 0 && (
+                  <div className="bg-dark-bg rounded-lg p-5 border border-dark-border overflow-x-auto">
+                    <h4 className="text-sm font-semibold text-gray-200 mb-4 flex items-center gap-2">
+                      <span>📈</span> Thống kê tổng hợp
+                    </h4>
+                    <table className="w-full text-sm text-gray-300">
+                      <caption className="sr-only">Bảng thống kê sức khoẻ tổng hợp {days} ngày</caption>
+                      <thead>
+                        <tr className="border-b border-dark-border text-gray-400 text-xs uppercase tracking-wider">
+                          <th scope="col" className="text-left py-2.5 pr-4">Chỉ số</th>
+                          <th scope="col" className="text-right py-2.5 px-3">Trung bình</th>
+                          <th scope="col" className="text-right py-2.5 px-3">Min</th>
+                          <th scope="col" className="text-right py-2.5 px-3">Max</th>
+                          <th scope="col" className="text-right py-2.5 px-3">Độ lệch</th>
+                          <th scope="col" className="text-right py-2.5 pl-3">Số ngày</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.entries(detailed.stats).map(([metric, s], i) => (
+                          <tr key={metric} className={`border-b border-dark-border/30 transition-colors hover:bg-dark-hover/30 ${i % 2 === 1 ? "bg-dark-card/30" : ""}`}>
+                            <td className="py-2.5 pr-4 font-medium text-gray-200">{METRIC_LABELS[metric] ?? metric}</td>
+                            <td className="text-right py-2.5 px-3 font-mono tabular-nums">{s.avg}</td>
+                            <td className="text-right py-2.5 px-3 font-mono tabular-nums text-blue-400">{s.min}</td>
+                            <td className="text-right py-2.5 px-3 font-mono tabular-nums text-orange-400">{s.max}</td>
+                            <td className="text-right py-2.5 px-3 font-mono tabular-nums text-gray-400">{s.std}</td>
+                            <td className="text-right py-2.5 pl-3 text-gray-400">{s.count}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
